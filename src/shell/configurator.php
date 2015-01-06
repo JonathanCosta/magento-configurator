@@ -2,9 +2,11 @@
 
 require_once 'abstract.php';
 
-class Cti_Configurator_Shell extends Mage_Shell_Abstract {
+class Cti_Configurator_Shell extends Mage_Shell_Abstract
+{
 
-    public function run() {
+    public function run() 
+    {
         $helper = Mage::helper('cti_configurator');
         $helper->processComponents(true);
     }

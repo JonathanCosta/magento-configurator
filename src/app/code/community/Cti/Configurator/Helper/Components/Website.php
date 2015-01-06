@@ -1,43 +1,50 @@
 <?php
-class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper_Components_Abstract {
+class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper_Components_Abstract
+{
 
     protected $_componentName = 'website';
 
-    public function __construct() {
-
+    public function __construct() 
+    {
         $this->_filePath1 = Mage::getBaseDir().DS.'app'.DS.'etc'.DS.'components'.DS.'websites.yaml';
-
     }
 
-    protected function _processFile($globalFile,$localFile = null) {
-
+    protected function _processFile($globalFile,$localFile = null) 
+    {
         if (!file_exists($globalFile)) {
             $this->log("No website configuration found in: " . $globalFile);
             $this->log("Skipping");
-            throw new Mage_Core_Exception("Cannot find website configuration YAML file.");
+            throw new Mage_Core_Exception(
+                "Cannot find website configuration YAML file."
+            );
         }
 
         // Decode the YAML File
-        $globalClass = new Zend_Config_Yaml($globalFile,
-            NULL,
-            array('ignore_constants' => true));
+        $globalClass = new Zend_Config_Yaml(
+            $globalFile,
+            null,
+            array('ignore_constants' => true)
+        );
         $globalArray = $globalClass->toArray();
 
         $localArray = array();
         if (file_exists($localFile)) {
             // Decode the YAML File
-            $localClass = new Zend_Config_Yaml($localFile,
-                NULL,
-                array('ignore_constants' => true));
+            $localClass = new Zend_Config_Yaml(
+                $localFile,
+                null,
+                array('ignore_constants' => true)
+            );
             $localArray = $localClass->toArray();
         }
 
-        $data = array_merge_recursive($globalArray,$localArray);
+        $data = array_merge_recursive($globalArray, $localArray);
 
         return $data;
     }
 
-    protected function _processComponent($data) {
+    protected function _processComponent($data) 
+    {
 
         if (isset($data['websites'])) {
 
@@ -45,7 +52,7 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
 
             // Process websites
             foreach ($data['websites'] as $code=>$config) {
-                $website = $this->__addUpdateWebsite($config,$code,$websiteCount);
+                $website = $this->__addUpdateWebsite($config, $code, $websiteCount);
 
                 foreach($config['store_groups'] as $sgConfig) {
 
@@ -53,7 +60,7 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
                         $sgConfig['root_category_id'] = $this->_getOrCreateCategoryByName($sgConfig['root_category'])->getId();
                     }
 
-                    $storeGroup = $this->__addUpdateStoreGroup($sgConfig,$website);
+                    $storeGroup = $this->__addUpdateStoreGroup($sgConfig, $website);
 
                     $storeCount = 1;
                     foreach ($sgConfig['stores'] as $code=>$sConfig) {
@@ -61,7 +68,7 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
                         // Increment Sort Order
                         $sConfig['sort_order'] = $storeCount;
                         $sConfig['code'] = $code;
-                        $this->__addUpdateStore($sConfig,$storeGroup);
+                        $this->__addUpdateStore($sConfig, $storeGroup);
                         $storeCount++;
                     }
                 }
@@ -72,10 +79,11 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
 
     }
 
-    protected function _getOrCreateCategoryByName($name) {
+    protected function _getOrCreateCategoryByName($name) 
+    {
         $categories = Mage::getResourceModel('catalog/category_collection')
-            ->addAttributeToFilter('name',$name)
-            ->addFieldToFilter('level',1);
+            ->addAttributeToFilter('name', $name)
+            ->addFieldToFilter('level', 1);
 
         if (!$categories->count()) {
 
@@ -96,15 +104,16 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
 
 
     /**
-     * @param array $config
+     * @param array  $config
      * @param string $code
-     * @param int $sortOrder
+     * @param int    $sortOrder
      * @return Mage_Core_Model_Website
      */
-    private function __addUpdateWebsite($config,$code,$sortOrder){
+    private function __addUpdateWebsite($config,$code,$sortOrder)
+    {
 
         // See if the website exists otherwise create the website
-        $website = Mage::getModel('core/website')->load($code,'code');
+        $website = Mage::getModel('core/website')->load($code, 'code');
         if ($website->getId()) {
             if ($website->getName() != $config['name'] || $website->getSortOrder() != $sortOrder) {
                 $website->setName($config['name'])
@@ -125,18 +134,20 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
     }
 
     /**
-     * @param array $sgConfig
+     * @param array                   $sgConfig
      * @param Mage_Core_Model_Website $website
      * @return Mage_Core_Model_Store_Group
      */
-    private function __addUpdateStoreGroup($sgConfig,$website) {
+    private function __addUpdateStoreGroup($sgConfig,$website) 
+    {
 
         // See if the store group exists otherwise create a store group
-        $storeGroup = Mage::getModel('core/store_group')->load($sgConfig['name'],'name');
+        $storeGroup = Mage::getModel('core/store_group')->load($sgConfig['name'], 'name');
         if ($storeGroup->getId()) {
 
             if ($storeGroup->getWebsiteId() != $website->getId()
-                || $storeGroup->getRootCategoryId() != $sgConfig['root_category_id']) {
+                || $storeGroup->getRootCategoryId() != $sgConfig['root_category_id']
+            ) {
 
                 $storeGroup->setWebsiteId($website->getId())
                     ->setRootCategoryId($sgConfig['root_category_id'])
@@ -156,21 +167,23 @@ class Cti_Configurator_Helper_Components_Website extends Cti_Configurator_Helper
     }
 
     /**
-     * @param   array $sConfig
+     * @param   array                       $sConfig
      * @param   Mage_Core_Model_Store_Group $storeGroup
      * @return  Mage_Core_Model_Store
      */
-    private function __addUpdateStore($sConfig,$storeGroup) {
+    private function __addUpdateStore($sConfig,$storeGroup) 
+    {
 
         // See if the store exists otherwise create a store
-        $store = Mage::getModel('core/store')->load($sConfig['code'],'code');
+        $store = Mage::getModel('core/store')->load($sConfig['code'], 'code');
         if ($store->getId()) {
 
             if ($store->getWebsiteId() != $storeGroup->getWebsiteId()
-            || $store->getGroupId() != $storeGroup->getId()
-            || $store->getName() != $sConfig['name']
-            || $store->getIsActive() != (isset($sConfig['active'])? $sConfig['active']:1)
-            || $store->getSortOrder() != $sConfig['sort_order']) {
+                || $store->getGroupId() != $storeGroup->getId()
+                || $store->getName() != $sConfig['name']
+                || $store->getIsActive() != (isset($sConfig['active'])? $sConfig['active']:1)
+                || $store->getSortOrder() != $sConfig['sort_order']
+            ) {
 
                 $store->setWebsiteId($storeGroup->getWebsiteId())
                     ->setGroupId($storeGroup->getId())

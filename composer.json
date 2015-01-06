@@ -1,0 +1,14 @@
+{
+    "name": "adampaterson/magento-configurator",
+    "type": "magento-module",
+    "require-dev": {
+        "squizlabs/php_codesniffer": "~2.1"
+    },
+    "authors": [
+        {
+            "name": "Adam Paterson",
+            "email": "hello@adampaterson.co.uk"
+        }
+    ],
+    "require": {}
+}
